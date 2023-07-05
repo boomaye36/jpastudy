@@ -1,6 +1,7 @@
 package com.fastcampus.programming.dmaker.service;
 
 import com.fastcampus.programming.dmaker.code.StatusCode;
+import com.fastcampus.programming.dmaker.constant.DMakerConstant;
 import com.fastcampus.programming.dmaker.dto.CreateDeveloper;
 import com.fastcampus.programming.dmaker.dto.DeveloperDetailDto;
 import com.fastcampus.programming.dmaker.dto.DeveloperDto;
@@ -13,17 +14,23 @@ import com.fastcampus.programming.dmaker.repository.RetiredDeveloperRepository;
 import com.fastcampus.programming.dmaker.type.DeveloperLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.fastcampus.programming.dmaker.constant.DMakerConstant.MAX_JUNIOR_EXPERIENCE_YEARS;
+import static com.fastcampus.programming.dmaker.constant.DMakerConstant.MIN_SENIOR_EXPERIENCE_YEARS;
 import static com.fastcampus.programming.dmaker.exception.DMakerErrorCode.*;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DMakerService {
+    @Value("${developer.level.min.senior}")
+    private final Integer minSeniorYears;
     private final DeveloperRepository developerRepository;
     private final RetiredDeveloperRepository retiredDeveloperRepository;
 
@@ -103,14 +110,14 @@ public class DMakerService {
 
     private static void validDeveloperLevel(DeveloperLevel developerLevel, Integer experienceYears) {
         if (developerLevel == DeveloperLevel.SENIOR
-                && experienceYears < 10) {
+                && experienceYears < MIN_SENIOR_EXPERIENCE_YEARS) {
             throw new DMakerException(LEVEL_EXPERIIENCE_YEARS_NOT_MATCHED);
         }
         if (developerLevel == DeveloperLevel.JUNGNIOR
-                && (experienceYears < 4 || experienceYears > 10)) {
+                && (experienceYears < MAX_JUNIOR_EXPERIENCE_YEARS || experienceYears > MIN_SENIOR_EXPERIENCE_YEARS)) {
             throw new DMakerException(LEVEL_EXPERIIENCE_YEARS_NOT_MATCHED);
         }
-        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > 4) {
+        if (developerLevel == DeveloperLevel.JUNIOR && experienceYears > MAX_JUNIOR_EXPERIENCE_YEARS) {
             throw new DMakerException(LEVEL_EXPERIIENCE_YEARS_NOT_MATCHED);
         }
     }
